@@ -22,6 +22,18 @@
       <div class="col-md-6 col-lg-4 mb-3">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
+
+            <div class="mb-2">
+                {% for tag in n.tags.all %}
+                <span class="badge rounded-pill bg-{{ tag.color }}">{{ tag.name }}</span>
+
+                <a href="?q={{ tag.name }}" class="badge rounded-pill bg-{{ tag.color }} text-decoration-none">
+                  {{ tag.name }}</a>
+
+                {% empty %}
+                {% endfor %}
+            </div>
+
             <h5 class="card-title">{{ n.title }}</h5>
             <h6 class="card-subtitle mb-2 text-muted">
               {{ n.created_at|date:"Y-m-d H:i" }}
