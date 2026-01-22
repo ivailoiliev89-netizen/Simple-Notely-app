@@ -2,9 +2,6 @@
 
 Notely is a Django-based web application, designed for managing personal notes with a focus on organization, searchability, and a clean user experience.
 
-Link to project and instructions to setup and run : 
-https://ivailoiliev89-netizen.github.io/Simple-Notely-app/
-
 ## Features
 
 - Categorize your notes using custom-colored badges.
@@ -33,7 +30,7 @@ https://ivailoiliev89-netizen.github.io/Simple-Notely-app/
 
 ## How to Use
 
-1. Sign Up: Create a new account to start your collection.
-2. Create Tags: Log into the Admin panel (/admin) to define your own categories ( Name: "Fishing", Color: "Blue").
-3. Write Notes: Use the "New Note" button to save your thoughts and check the tags you want to apply.
-4. Organize: Click on any tag on your dashboard to instantly filter notes by that category.
+1. Sign Up : Create a new account to start your collection.
+2. Create Tags : Log into the Admin panel (/admin) to define your own categories ( Name: "Fishing", Color: "Blue").
+3. Write Notes : Use the "New Note" button to save your thoughts and check the tags you want to apply.
+4. Organize : Click on any tag on your dashboard to instantly filter notes by that category.
