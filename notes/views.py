@@ -1,9 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
-from .models import Note
 from rest_framework import viewsets, permissions
 from .serializers import NoteSerializer
+from django import forms
+from .models import Tag,Note
+from django.db.models import Q
 
 
 class OwnerQuerySetMixin(LoginRequiredMixin):
@@ -22,13 +24,17 @@ class NoteListView(OwnerQuerySetMixin, ListView):
         queryset = super().get_queryset()
         q = self.request.GET.get('q')
         if q:
-            queryset = queryset.filter(title__icontains=q) | queryset.filter(content__icontains=q)
+            queryset = queryset.filter(
+                Q(title__icontains=q) |
+                Q(content__icontains=q) |
+                Q(tags__name__icontains=q)
+            ).distinct()
         return queryset
 
 
 class NoteDetailView(OwnerQuerySetMixin, DetailView):
     model = Note
-    template_name = 'note/note_detail.html'
+    template_name = 'notes/note_detail.html'
     context_object_name = 'note'
 
     def form_valid(self, form):
@@ -38,9 +44,16 @@ class NoteDetailView(OwnerQuerySetMixin, DetailView):
 
 class NoteCreateView(LoginRequiredMixin, CreateView):
     model = Note
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'tags']
     template_name = 'notes/note_form.html'
     success_url = reverse_lazy('note-list')
+
+    def get_form(self, form_class=None):
+        """"Change tags vision --> to checkboxes"""
+        form = super().get_form(form_class)
+        form.fields['tags'].widget = forms.CheckboxSelectMultiple()
+        form.fields['tags'].queryset = Tag.objects.all()
+        return form
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -49,14 +62,21 @@ class NoteCreateView(LoginRequiredMixin, CreateView):
 
 class NoteUpdateView(OwnerQuerySetMixin, UpdateView):
     model = Note
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'tags']
     template_name = 'notes/note_form.html'
     success_url = reverse_lazy('note-list')
+
+    def get_form(self, form_class=None):
+        """"Change tags vision --> to checkboxes"""
+        form = super().get_form(form_class)
+        form.fields['tags'].widget = forms.CheckboxSelectMultiple()
+        form.fields['tags'].queryset = Tag.objects.all()
+        return form
 
 
 class NoteDeleteView(OwnerQuerySetMixin, DeleteView):
     model = Note
-    template_name = 'note/note_delete.html'
+    template_name = 'notes/note_delete.html'
     success_url = reverse_lazy('note-list')
 
 
@@ -76,5 +96,8 @@ class NoteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
-            return Note.objects.filter(owner=user).order_by('created_at')
+            return Note.objects.filter(owner=user).order_by('-created_at')
         return Note.objects.none()
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
